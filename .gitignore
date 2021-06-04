@@ -24,3 +24,5 @@ yarn-error.log*
 
 #my own add
 src/myJS.js
+*.js.swp
+
