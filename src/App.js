@@ -4,12 +4,14 @@ import {useState} from 'react'
 import Getdata from './fetcher'
 
 function App(props) {
+  document.title='Todo List'
   const [dataTypes, setDataTypes]=useState(props.dataType)
     return (
-    <div>
-        <button className='btn bg-primary m-3' onClick={()=>setDataTypes('')}>All The Taks</button>
-        <button className='btn bg-primary m-3' onClick={()=>setDataTypes('true')}>Completed Taks</button>
-        <button className='btn bg-primary m-3' onClick={()=>setDataTypes('False')}>No Completed Taks</button>
+    <div className='container'>
+        <button className='btn bg-primary m-5 text-center' onClick={()=>setDataTypes('')}>All The Taks</button>
+        <button className='btn bg-primary m-5' onClick={()=>setDataTypes('true')}>Completed Taks</button>
+        <button className='btn bg-primary m-5' onClick={()=>setDataTypes('False')}>No Completed Taks</button>
+        <button className='btn bg-warning m-5' onClick={() =>setDataTypes('Nothing')}>Nothing</button>
         <Getdata dataType={dataTypes}/>
     </div>
     )
