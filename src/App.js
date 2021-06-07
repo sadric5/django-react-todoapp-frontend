@@ -11,7 +11,8 @@ function App(props) {
         <button className='btn bg-primary m-5 text-center' onClick={()=>setDataTypes('')}>All The Taks</button>
         <button className='btn bg-primary m-5' onClick={()=>setDataTypes('true')}>Completed Taks</button>
         <button className='btn bg-primary m-5' onClick={()=>setDataTypes('False')}>No Completed Taks</button>
-        <button className='btn bg-warning m-5' onClick={() =>setDataTypes('Nothing')}>Nothing</button>
+        <button className='btn bg-warning m-5' onClick={() =>setDataTypes('Nothing')}>Update</button>
+        <button className='btn bg-success m-5' onClick={() =>setDataTypes('Nothing')}>Add Taks</button>
         <Getdata dataType={dataTypes}/>
     </div>
     )

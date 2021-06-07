@@ -1,15 +1,14 @@
 
 import axios from 'axios';
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react';
+import Form, {Output} from './myForm';
 
-
- 
 
 function Getdata(props){
     const [data, setData]=useState([])
     useEffect( () => {
         if(props.dataType!=='Nothing'){
-            const pre_url = 'http://localhost:8000/api/tasks/'
+            const pre_url = 'http://10.0.0.99:8000/api/tasks/'
             const url = pre_url + props.dataType
             axios.get(url)
             .then(res=>{
@@ -27,23 +26,11 @@ function Getdata(props){
     ,[props.dataType,])
     if(props.dataType==='Nothing'){
         
-        return <h1>Hello World!!</h1>
+        return <Form/>
     }else{
         return <Output data={data}/>;
     }
     
 }
-
-
-function Output(props){
-    return (props.data.map(item =>(
-        <div className='card task text-center m-5 bg-secondary' key={item.id}>
-            <h1 className='data-display text-success'>{item.author}</h1>
-            <h5 className='text-info'>{item.title}</h5>
-            <p className='card-body bg-'>{item.description}</p>
-            <span className='text-danger'>{item.create_at}</span>
-        </div>
-    )))
-}
-
 export default Getdata;
+
