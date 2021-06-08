@@ -13,10 +13,12 @@ function Getdata(props){
             axios.get(url)
             .then(res=>{
                 setData(res.data);
+                console.log(res.request.responseURL);
             })
 
             .catch(error =>{
                 console.log(error.message);
+                console.log(error.request);
             })
         }else{
             console.log('Noything to fetch this time!')
