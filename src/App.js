@@ -8,12 +8,15 @@ function App(props) {
   const [dataTypes, setDataTypes]=useState(props.dataType)
     return (
     <div className='container'>
+      <div className='bg-secondary container-fluid mb-2 navbar'>
         <button className='btn bg-primary m-5 text-center' onClick={()=>setDataTypes('')}>All The Taks</button>
         <button className='btn bg-primary m-5' onClick={()=>setDataTypes('true')}>Completed Taks</button>
         <button className='btn bg-primary m-5' onClick={()=>setDataTypes('False')}>No Completed Taks</button>
-        <button className='btn bg-warning m-5' onClick={() =>setDataTypes('Nothing')}>Update</button>
         <button className='btn bg-success m-5' onClick={() =>setDataTypes('Nothing')}>Add Taks</button>
-        <Getdata dataType={dataTypes}/>
+        </div>
+        <div className='container bg-light'>
+          <Getdata dataType={dataTypes}/>
+        </div>
     </div>
     )
 }

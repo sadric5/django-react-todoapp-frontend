@@ -20,8 +20,6 @@ function Getdata(props){
                 console.log(error.message);
                 console.log(error.request);
             })
-        }else{
-            console.log('Noything to fetch this time!')
         }
         
     }

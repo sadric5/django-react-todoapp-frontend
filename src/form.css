@@ -1,0 +1,11 @@
+input, textarea{
+    outline:none;
+}
+
+.update{
+    opacity: 0.6;
+}
+
+.navbar{
+    opacity: .7;
+}
