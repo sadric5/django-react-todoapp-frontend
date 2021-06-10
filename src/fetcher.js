@@ -13,7 +13,7 @@ function Getdata(props){
             axios.get(url)
             .then(res=>{
                 setData(res.data);
-                console.log(res.request.responseURL);
+                // console.log(res.request.responseURL);
             })
 
             .catch(error =>{
@@ -27,6 +27,8 @@ function Getdata(props){
     if(props.dataType==='Nothing'){
         
         return <Form/>
+    }else if(props.yes){
+        return data;
     }else{
         return <Output data={data}/>;
     }

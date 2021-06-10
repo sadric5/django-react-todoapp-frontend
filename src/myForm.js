@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import './form.css'
+import UpdateForm from './formUpdateDelete'
 // import 'bootstrap/dist/css/bootstrap.min.css';
 function Output(props){
 
@@ -8,9 +9,7 @@ function Output(props){
     //     return console.log(ev);
     // }
 
-    function hello(){
-        console.log('Hello world!')
-    }
+    
 
     return (props.data.map(item =>(
         <div className='card task text-center m-4 border-5 bg-light' key={item.id}>
@@ -19,8 +18,7 @@ function Output(props){
             <p className='card-body bg-'>{item.description}</p>
             <span className='text-danger'>{item.create_at}</span>
             <div>
-                <button className='btn bg-success m-4 update' onClick={hello()}>Update {item.id}</button>
-                <button className='btn bg-danger m-4 delete'>Delete {item.id}</button>
+                <UpdateForm id={item.id}/>
             </div>
 
         </div>
