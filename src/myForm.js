@@ -2,14 +2,9 @@ import React from 'react';
 import axios from 'axios';
 import './form.css'
 import UpdateForm from './formUpdateDelete'
-// import 'bootstrap/dist/css/bootstrap.min.css';
+
+
 function Output(props){
-
-    // function b (ev, id){
-    //     return console.log(ev);
-    // }
-
-    
 
     return (props.data.map(item =>(
         <div className='card task text-center m-4 border-5 bg-light' key={item.id}>
@@ -36,9 +31,6 @@ class Form extends React.Component{
             errors : '',
             statusCode: '',
         };
-
-        // this.handleOnchange=this.handleOnchange.bind(this);
-        // this.handleSubmit= this.handleSubmit.bind(this);
     }
     handleSubmit= (e) => {
         console.log(this.state.description);

@@ -8,12 +8,12 @@ function Getdata(props){
     const [data, setData]=useState([])
     useEffect( () => {
         if(props.dataType!=='Nothing'){
-            const pre_url = 'http://10.0.0.99:8000/api/tasks/'
+            const enpoint = 'http://10.0.0.99:8000/api/'
+            const pre_url = enpoint+'tasks/'
             const url = pre_url + props.dataType
             axios.get(url)
             .then(res=>{
                 setData(res.data);
-                // console.log(res.request.responseURL);
             })
 
             .catch(error =>{
@@ -24,13 +24,19 @@ function Getdata(props){
         
     }
     ,[props.dataType,])
-    if(props.dataType==='Nothing'){
-        
+    const value={
+        method : 'GET',
+        dataType : props.dataType,
+    }
+
+    if(props.dataType==='Nothing'){        
         return <Form/>
     }else if(props.yes){
         return data;
+
     }else{
         return <Output data={data}/>;
+        
     }
     
 }

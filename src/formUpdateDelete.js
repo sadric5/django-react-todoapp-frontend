@@ -1,5 +1,5 @@
 
-import Getdata from './fetcher'
+import Getdata from './getDataFromApi'
 
 
 
