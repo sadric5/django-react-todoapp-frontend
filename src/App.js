@@ -1,22 +1,19 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState,  useEffect} from 'react'
-import Getdata, {FetchData} from './getDataFromApi'
 import axios from 'axios'
-// import Form, {Output} from './myForm';
 
 // ============================= Main App===================
 function App(props) {
 
   const [dataTypes, setDataTypes]=useState('')
-  const [updatData, setUpdateData]=useState(false)
- 
+  const [updateData, setUpdateData]=useState(false)
   const [data, setData]=useState([])
+  const [resourceType, setResourceType] = useState('')
+
     useEffect( () => {
-        if(props.dataType!=='Nothing'){
-            const enpoint = 'http://10.0.0.99:8000/api/'
-            const pre_url = enpoint+'tasks/'
-            const url = pre_url + props.dataType
+            let url = `http://10.0.0.99:8000/api/tasks/${resourceType}`
+            if(updateData) url = `http://10.0.0.99:8000/api/task/1`
             axios.get(url)
             .then(res=>{
                 setData(res.data);
@@ -26,30 +23,50 @@ function App(props) {
                 console.log(error.message);
                 console.log(error.request);
             })
-        }
         
     }
-    ,[dataTypes])
+    ,[resourceType, updateData])
 
+    const taskHandler = ()=>{
+      setUpdateData(false);
+      setResourceType('');
+    }
+
+    const taskHandler1 = ()=>{
+      setUpdateData(false);
+      setResourceType('true');
+    }
+
+    const taskHandler2 = ()=>{
+      setUpdateData(false);
+      setResourceType('false');
+    }
+
+    const taskHandler3 = ()=>{
+      setUpdateData(false);
+      setResourceType('Nothing');
+    }
+
+    const handler = ()=>{
+      setUpdateData(true);
+
+    }
   
   return (
     <div className='container'>
       <div className='bg-secondary container-fluid mb-2 navbar'>
-        <button className='btn bg-primary m-5 text-center' onClick={()=>setDataTypes('')}>All The Taks</button>
+        <button className='btn bg-primary m-5 text-center' onClick={taskHandler}>All The Taks</button>
 
-        <button className='btn bg-primary m-5' onClick={()=>setDataTypes('true')}>Completed Taks</button>
+        <button className='btn bg-primary m-5' onClick={taskHandler1}>Completed Taks</button>
 
-        <button className='btn bg-primary m-5' onClick={()=>setDataTypes('False')}>No Completed Taks</button>
+        <button className='btn bg-primary m-5' onClick={taskHandler2}>No Completed Taks</button>
         
-        <button className='btn bg-success m-5' onClick={() =>setDataTypes('Nothing')}>Add Taks</button>
+        <button className='btn bg-success m-5' onClick={taskHandler3}>Add Taks</button>
 
-        <button className='btn bg-primary m-5 text-center' onClick={()=>setUpdateData(true)}> Update</button>
-
-        <button className='btn bg-primary m-5 text-center' onClick={()=>setUpdateData(false)}> Delete</button>
       </div>
 
-      {displayer(updatData, 'Sadric')}
-      
+      <Displayer data={data} update={updateData} onClick ={handler}/>
+            
     </div>
     )
 }
@@ -57,9 +74,16 @@ function App(props) {
 
 
 // ============================= Display App===================
-function displayer(pros){
-  if(pros){
-    return <UpdateCreateForm name='Sadric'/>
+function Displayer(props){
+
+  if(props.update){
+    return <UpdateCreateForm data={props.data}/>;
+  }else if(props.data.length===0){
+    return <h3>Hello!! {props.data.length}</h3>
+  }else if(props.data.length>2){
+    return <Output data={props.data} onClick ={props.onClick}/>
+  }else{
+    return <h3>HI THERE</h3>
   }
 }
 
@@ -69,23 +93,28 @@ function displayer(pros){
 
 // ============================= updatCreateForm App===================
 function UpdateCreateForm(props){
+
+  let value = ''
+  if(props.data) value = props.data;
   return (
+
   <div className='container bg-secondary'>
   <form  >
-      <label> Author:</label>
-      <input type='text' className='form-control-plaintext bg-white' name='author'/>
-      <br/>
-      <label className='ms-5'>Title:</label>
-      <input type='text' className='form-control-plaintext bg-white' name='title'/>
-      <br/>
-      <label> Description:</label>
-      <textarea name='description' className='form-control-plaintext bg-white'/>
-      <br/>
-      <label> completed :</label>
-      <input type='checkbox' className='form-control-plaintext bg-white' name='completed'/>
+    {/* {console.log(value)} */}
+    <label> Author:</label>
+    <input type='text' className='form-control-plaintext bg-white p-2' name='author' value={value.id}/>
+    <br/>
+    <label className='ms-5'>Title:</label>
+    <input type='text' className='form-control-plaintext bg-white' name='title'  value={value.title}/>
+    <br/>
+    <label> Description:</label>
+    <textarea name='description' className='form-control-plaintext bg-white'  value={value.description}/>
+    <br/>
+    <label> completed :</label>
+    <input type='checkbox' className='form-control-plaintext bg-white' name='completed'  defaultChecked={value.completed}/>
 
-      <br/>
-      <input className='ms-4 text-success' type="submit" value="send"/>
+    <br/>
+    <input className='ms-4 text-success' type="submit" value="send"/>
   </form>
   </div>)
 }
@@ -102,9 +131,25 @@ function Output(props){
           <h5 className='text-info'>{item.title}</h5>
           <p className='card-body bg-'>{item.description}</p>
           <span className='text-danger'>{item.create_at}</span>
+
+          <div>
+            <UpdateButhton  id={item.id} onClick={props.onClick}/>
+          </div>
           
       </div>
   )))
+}
+
+
+// ============================= Update Button===================
+function UpdateButhton(props){
+  return (
+    <div>
+      <button className='btn bg-success m-5 text-center' onClick={props.onClick}> Update</button>
+
+      <button className='btn bg-danger m-5 text-center' > Delete</button>
+    </div>
+  )
 }
 export default App;
 
@@ -118,28 +163,3 @@ export default App;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/* 
-        
-        </div>
-        <div className='container bg-light'>
-          <Getdata dataType={dataTypes}/>
-        </div> */}
