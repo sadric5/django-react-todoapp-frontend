@@ -21,7 +21,7 @@ function App(props) {
             
             if(deleteTask){
               var url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`;
-            }else if(['true', 'false', ''].includes(resourceType)){
+            }else if(['completed', 'incompleted', ''].includes(resourceType)){
               url = `http://10.0.0.99:8000/api/tasks/${resourceType}`;
             }else{
               
