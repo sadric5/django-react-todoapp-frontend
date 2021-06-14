@@ -6,7 +6,7 @@ import axios from 'axios'
 // ============================= Main App===================
 function App(props) {
 
-  const [dataTypes, setDataTypes]=useState();
+  // const [dataTypes, setDataTypes]=useState();
   const [updateData, setUpdateData]=useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState();
   const [data, setData]=useState([]);
@@ -14,20 +14,48 @@ function App(props) {
   const [dataToSend, setDataToSend] = useState({});
   const [requestMethode, setRequestMethode]= useState('GET')
   const [successMessage, setSuccessMessage] = useState()
+  const [newTask, setNewtask]=useState();
+  const[deleteTask, setDeleteTask]= useState();
 
     useEffect( () => {
-            let url = `http://10.0.0.99:8000/api/tasks/${resourceType}`
-            if(updateData){
+            
+            if(deleteTask){
+              var url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`;
+            }else if(['true', 'false', ''].includes(resourceType)){
+              url = `http://10.0.0.99:8000/api/tasks/${resourceType}`;
+            }else{
+              
+              url = `http://10.0.0.99:8000/api/tasks/`;
+            }            
+            if(updateData && taskToUpdate){
               url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
-              setRequestMethode(''); 
+              // setRequestMethode(''); 
             }
 
             //PUT request
             if(requestMethode==="PUT"){
+              //Avoid display the UpdateCreatForm by set newTask to Undifined
+              setNewtask();
               axios.put(url, dataToSend)
               .then(res=>{
                   setData(res.data);
                   console.log(res.statusText)
+                  //set the succeful message
+                  setSuccessMessage(res.statusText)
+              })
+  
+              .catch(error =>{
+                  console.log(error.message);
+                  console.log(error.request);
+                  // setSuccessMessage(error.statusText)
+              })
+            }else if(requestMethode==='DELETE'){
+              // setNewtask();
+              axios.delete(url, dataToSend)
+              .then(res=>{
+                  setData(res.data);
+                  console.log(res.statusText)
+                  //set the succeful message
                   setSuccessMessage(res.statusText)
               })
   
@@ -35,7 +63,9 @@ function App(props) {
                   console.log(error.message);
                   console.log(error.request);
               })
-            }else{
+            }else if (requestMethode==='GET'){
+              //Avoid display the UpdateCreatForm by set newTask to Undifined
+              setNewtask();
               setSuccessMessage('')
               //get request
               axios.get(url)
@@ -51,29 +81,45 @@ function App(props) {
             
         
     }
-    ,[resourceType, updateData, taskToUpdate,requestMethode, ]);
+    ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask]);
 
     const taskHandlerAll = ()=>{
-      setUpdateData(false);
+      setRequestMethode("GET")
       setResourceType('');
+      setDeleteTask(false);
+      setUpdateData(false);
     }
 
     const taskHandlerCompleted = ()=>{
+      setRequestMethode('GET');
+      setResourceType('completed');
+      setDeleteTask(false);
       setUpdateData(false);
-      setResourceType('true');
+      
     }
 
     const taskHandlerIncompleted = ()=>{
+      setRequestMethode('GET');
+      setResourceType('incompleted');
+      setDeleteTask(false);
       setUpdateData(false);
-      setResourceType('false');
+      
     }
 
     const taskHandlerNew = ()=>{
-      setUpdateData(false);
-      setUpdateData(true);
-      // setResourceType('');
+      setRequestMethode('POST');
+      setDeleteTask(false);
+      setNewtask(true);
     }
 
+    //Delete task
+    const onDeleteHandler = (taskId)=>{
+      setRequestMethode('DELETE');
+      setTaskToUpdate(taskId);
+      setDeleteTask(true)
+    }
+
+    //Update task
     const handler = (taskId)=>{
       setUpdateData(true);
       setTaskToUpdate(taskId);
@@ -93,8 +139,12 @@ function App(props) {
 
     const handlerOnSubmit = (e)=>{
       console.log(dataToSend)
-      //change the request type to POST
+      //change the request type PUT or POST
+      if(newTask){
+        setRequestMethode("POST")
+      }else{
       setRequestMethode('PUT');
+      }
       e.preventDefault();
 
     }
@@ -113,7 +163,16 @@ function App(props) {
 
       </div>
 
-      <Displayer data={data} update={updateData} onClick={handler} onChange={handlerOnChange} onSubmit={handlerOnSubmit} successMessage={successMessage}/>
+      <Displayer
+        data={data}
+        update={updateData}
+        deleteTask={deleteTask}
+        onClick={handler}
+        onChange={handlerOnChange} onSubmit={handlerOnSubmit} 
+        successMessage={successMessage}
+        newTaskBoolean={newTask}
+        onDelete={onDeleteHandler}
+       />
             
     </div>
     )
@@ -124,6 +183,14 @@ function App(props) {
 // ============================= Display App===================
 function Displayer(props){
 
+  if(props.newTaskBoolean){
+    //create new task
+    return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
+  }
+  if(props.deleteTask){
+    return <h3 className='text-center text-success'>Your successfully delete the task!!</h3>
+  }
+
   if(props.successMessage){
     return <h2 className='text-center text-success'>You are successfully update the task!</h2>
   }else if(props.update){
@@ -131,7 +198,7 @@ function Displayer(props){
   }else if(props.data.length===0){
     return <h3>Hello!! {props.data.length}</h3>
   }else if(props.data.length>2){
-    return <Output data={props.data} onClick={props.onClick} />
+    return <Output data={props.data} onClick={props.onClick} onDelete ={props.onDelete}/>
   }else{
     return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
   }
@@ -182,7 +249,7 @@ function Output(props){
           <span className='text-danger'>{item.create_at}</span>
 
           <div>
-            <UpdateButhton  id={item.id} onClick={(n=item.id)=>props.onClick(n)}/>
+            <UpdateButhton  id={item.id} onClick={(n=item.id)=>props.onClick(n)} onDelete={(n=item.id)=>props.onDelete(n)}/>
           </div>
           
       </div>
@@ -196,7 +263,7 @@ function UpdateButhton(props){
     <div>
       <button className='btn bg-success m-5 text-center' onClick={()=>props.onClick()}> Update</button>
 
-  <button className='btn bg-danger m-5 text-center' > Delete {props.id}</button>
+    <button className='btn bg-danger m-5 text-center' onClick={()=>props.onDelete()} > Delete</button>
     </div>
   )
 }
