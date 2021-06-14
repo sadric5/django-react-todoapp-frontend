@@ -6,47 +6,72 @@ import axios from 'axios'
 // ============================= Main App===================
 function App(props) {
 
-  const [dataTypes, setDataTypes]=useState('');
+  const [dataTypes, setDataTypes]=useState();
   const [updateData, setUpdateData]=useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState();
   const [data, setData]=useState([]);
-  const [resourceType, setResourceType] = useState('');
+  const [resourceType, setResourceType] = useState();
   const [dataToSend, setDataToSend] = useState({});
+  const [requestMethode, setRequestMethode]= useState('GET')
+  const [successMessage, setSuccessMessage] = useState()
 
     useEffect( () => {
             let url = `http://10.0.0.99:8000/api/tasks/${resourceType}`
-            if(updateData) url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
-            axios.get(url)
-            .then(res=>{
-                setData(res.data);
-            })
+            if(updateData){
+              url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
+              setRequestMethode(''); 
+            }
 
-            .catch(error =>{
-                console.log(error.message);
-                console.log(error.request);
-            })
+            //PUT request
+            if(requestMethode==="PUT"){
+              axios.put(url, dataToSend)
+              .then(res=>{
+                  setData(res.data);
+                  console.log(res.statusText)
+                  setSuccessMessage(res.statusText)
+              })
+  
+              .catch(error =>{
+                  console.log(error.message);
+                  console.log(error.request);
+              })
+            }else{
+              setSuccessMessage('')
+              //get request
+              axios.get(url)
+              .then(res=>{
+                setData(res.data);
+              })
+
+              .catch(error =>{
+                  console.log(error.message);
+                  console.log(error.request);
+              })
+              }
+            
         
     }
-    ,[resourceType, updateData]);
+    ,[resourceType, updateData, taskToUpdate,requestMethode, ]);
 
-    const taskHandler = ()=>{
+    const taskHandlerAll = ()=>{
       setUpdateData(false);
       setResourceType('');
     }
 
-    const taskHandler1 = ()=>{
+    const taskHandlerCompleted = ()=>{
       setUpdateData(false);
       setResourceType('true');
     }
 
-    const taskHandler2 = ()=>{
+    const taskHandlerIncompleted = ()=>{
       setUpdateData(false);
       setResourceType('false');
     }
 
-    const taskHandler3 = ()=>{
+    const taskHandlerNew = ()=>{
       setUpdateData(false);
-      setResourceType('Nothing');
+      setUpdateData(true);
+      // setResourceType('');
     }
 
     const handler = (taskId)=>{
@@ -56,22 +81,20 @@ function App(props) {
     }
     
     const handlerOnChange = (e)=>{
-      let dataValue = {
-        'author':'lo'
-      }
+      let dataValue = data
       const name = e.target.name;
       const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
       dataValue[name]=value;
-      
-
       setDataToSend(dataValue);
+      // delete dataValue.id;
+      console.log(dataToSend);
       
-     
-
     }
 
     const handlerOnSubmit = (e)=>{
       console.log(dataToSend)
+      //change the request type to POST
+      setRequestMethode('PUT');
       e.preventDefault();
 
     }
@@ -80,17 +103,17 @@ function App(props) {
   return (
     <div className='container'>
       <div className='bg-secondary container-fluid mb-2 navbar'>
-        <button className='btn bg-primary m-5 text-center' onClick={taskHandler}>All The Taks</button>
+        <button className='btn bg-primary m-5 text-center' onClick={taskHandlerAll}>All The Taks</button>
 
-        <button className='btn bg-primary m-5' onClick={taskHandler1}>Completed Taks</button>
+        <button className='btn bg-primary m-5' onClick={taskHandlerCompleted}>Completed Taks</button>
 
-        <button className='btn bg-primary m-5' onClick={taskHandler2}>No Completed Taks</button>
+        <button className='btn bg-primary m-5' onClick={taskHandlerIncompleted}>No Completed Taks</button>
         
-        <button className='btn bg-success m-5' onClick={taskHandler3}>Add Taks</button>
+        <button className='btn bg-success m-5' onClick={taskHandlerNew}>Add Taks</button>
 
       </div>
 
-      <Displayer data={data} update={updateData} onClick={handler} onChange={handlerOnChange} onSubmit={handlerOnSubmit}/>
+      <Displayer data={data} update={updateData} onClick={handler} onChange={handlerOnChange} onSubmit={handlerOnSubmit} successMessage={successMessage}/>
             
     </div>
     )
@@ -101,14 +124,16 @@ function App(props) {
 // ============================= Display App===================
 function Displayer(props){
 
-  if(props.update){
+  if(props.successMessage){
+    return <h2 className='text-center text-success'>You are successfully update the task!</h2>
+  }else if(props.update){
     return <UpdateCreateForm data={props.data} onChange={props.onChange} onSubmit={props.onSubmit}/>;
   }else if(props.data.length===0){
     return <h3>Hello!! {props.data.length}</h3>
   }else if(props.data.length>2){
     return <Output data={props.data} onClick={props.onClick} />
   }else{
-    return <h3>HI THERE</h3>
+    return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
   }
 }
 
@@ -120,13 +145,13 @@ function Displayer(props){
 function UpdateCreateForm(props){
 
   let value = ''
-  if(props.data) value = props.data;
+  if(props.data) {value = props.data};
   return (
 
   <div className='container bg-secondary'>
     <form  onSubmit={(e)=>props.onSubmit(e)}>
-      <label> Author:</label>
-      <input type='text' className='form-control-plaintext bg-white p-2' name='author' defaultValue={value.id} onChange={(e)=>props.onChange(e)}/>
+      {/* <label> Author:</label> */}
+      <input type='text' className='form-control-plaintext bg-white p-2' name='author' hidden defaultValue={value.id} onChange={(e)=>props.onChange(e)}/>
       <br/>
       <label className='ms-5'>Title:</label>
       <input type='text' className='form-control-plaintext bg-white' name='title'  defaultValue={value.title} onChange={(e)=>props.onChange(e)}/>
