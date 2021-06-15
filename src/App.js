@@ -12,7 +12,7 @@ function App(props) {
   const [data, setData]=useState([]);
   const [resourceType, setResourceType] = useState();
   const [dataToSend, setDataToSend] = useState({});
-  const [requestMethode, setRequestMethode]= useState('GET')
+  const [requestMethode, setRequestMethode]= useState()
   const [successMessage, setSuccessMessage] = useState()
   const [newTask, setNewtask]=useState();
   const[deleteTask, setDeleteTask]= useState();
@@ -21,16 +21,18 @@ function App(props) {
             
             if(deleteTask){
               var url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`;
-            }else if(['completed', 'incompleted', ''].includes(resourceType)){
+            }else if(['completed', 'incompleted'].includes(resourceType)){
               url = `http://10.0.0.99:8000/api/tasks/${resourceType}`;
+            }else if(updateData && taskToUpdate){
+              url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
+              // setRequestMethode(''); 
+            }else if(newTask){
+              //Make a POST request to this endpoint;
+              url = `http://10.0.0.99:8000/api/task/`
             }else{
               
               url = `http://10.0.0.99:8000/api/tasks/`;
-            }            
-            if(updateData && taskToUpdate){
-              url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
-              // setRequestMethode(''); 
-            }
+            }  
 
             //PUT request
             if(requestMethode==="PUT"){
@@ -77,8 +79,22 @@ function App(props) {
                   console.log(error.message);
                   console.log(error.request);
               })
-              }
-            
+            }else if(requestMethode==="POST"){
+              //Create a new Task;
+              axios.post(url, dataToSend)
+              .then(res=>{
+                  setData(res.data);
+                  console.log(res.statusText)
+                  //set the succeful message
+                  setSuccessMessage(res.statusText)
+              })
+  
+              .catch(error =>{
+                  console.log(error.message);
+                  console.log(error.request);
+                  // setSuccessMessage(error.statusText)
+              })
+            }
         
     }
     ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask]);
@@ -95,6 +111,7 @@ function App(props) {
       setResourceType('completed');
       setDeleteTask(false);
       setUpdateData(false);
+      setNewtask(false);
       
     }
 
@@ -103,11 +120,13 @@ function App(props) {
       setResourceType('incompleted');
       setDeleteTask(false);
       setUpdateData(false);
+      setNewtask(false);
       
     }
 
     const taskHandlerNew = ()=>{
-      setRequestMethode('POST');
+      setData({});
+      // setRequestMethode('POST');
       setDeleteTask(false);
       setNewtask(true);
     }
@@ -126,30 +145,47 @@ function App(props) {
 
     }
     
-    const handlerOnChange = (e)=>{
-      let dataValue = data
+    const handlerOnChangeForNewTask = (e)=>{
+      let dataValue = {
+        'author':'sadric',
+        'description':'',
+        'title':'',
+        'completed':false
+      }
       const name = e.target.name;
       const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
       dataValue[name]=value;
       setDataToSend(dataValue);
-      // delete dataValue.id;
       console.log(dataToSend);
+    
+    }
+
+    const handlerOnChange = (e)=>{
+      let dataValue = {}
+      const name = e.target.name;
+      const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
+      dataValue[name]=value;
+      // setDataToSend({[name]:value});
+      console.log(dataValue)
+      // delete dataValue.id;
+      // console.log(dataToSend);
+      // console.log({[name]:value});
       
     }
 
     const handlerOnSubmit = (e)=>{
       console.log(dataToSend)
       //change the request type PUT or POST
-      if(newTask){
-        setRequestMethode("POST")
-      }else{
-      setRequestMethode('PUT');
-      }
+      // if(newTask){
+      //   setRequestMethode("POST")
+      // }
+      // else{
+      // setRequestMethode('PUT');
+      // }
       e.preventDefault();
 
     }
     
-    // console.log(dataToSend)
   return (
     <div className='container'>
       <div className='bg-secondary container-fluid mb-2 navbar'>
@@ -168,7 +204,11 @@ function App(props) {
         update={updateData}
         deleteTask={deleteTask}
         onClick={handler}
-        onChange={handlerOnChange} onSubmit={handlerOnSubmit} 
+        method = {requestMethode}//don't need just for debuging
+        
+        onChange={newTask?handlerOnChangeForNewTask:handlerOnChange}
+      
+        onSubmit={handlerOnSubmit} 
         successMessage={successMessage}
         newTaskBoolean={newTask}
         onDelete={onDeleteHandler}
@@ -183,24 +223,21 @@ function App(props) {
 // ============================= Display App===================
 function Displayer(props){
 
-  if(props.newTaskBoolean){
+  if(props.newTaskBoolean || props.data.length===0){
     //create new task
     return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
-  }
-  if(props.deleteTask){
+  }else if(props.deleteTask){
     return <h3 className='text-center text-success'>Your successfully delete the task!!</h3>
-  }
-
-  if(props.successMessage){
+  }else if(props.successMessage){
     return <h2 className='text-center text-success'>You are successfully update the task!</h2>
   }else if(props.update){
     return <UpdateCreateForm data={props.data} onChange={props.onChange} onSubmit={props.onSubmit}/>;
-  }else if(props.data.length===0){
-    return <h3>Hello!! {props.data.length}</h3>
-  }else if(props.data.length>2){
+  }else if(props.data.length>1){
     return <Output data={props.data} onClick={props.onClick} onDelete ={props.onDelete}/>
-  }else{
-    return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
+  }
+  else{
+    // return <UpdateCreateForm onChange={props.onChange} onSubmit={props.onSubmit}/>
+    return <h2>Nothing to display</h2>
   }
 }
 
