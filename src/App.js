@@ -7,6 +7,13 @@ import axios from 'axios'
 function App(props) {
 
   // const [dataTypes, setDataTypes]=useState();
+  let init = {
+    'author':1,
+    'description':'',
+    'title':'',
+    'completed':false
+  }//Initial data for new task
+
   const [updateData, setUpdateData]=useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState();
   const [data, setData]=useState([]);
@@ -16,12 +23,13 @@ function App(props) {
   const [successMessage, setSuccessMessage] = useState()
   const [newTask, setNewtask]=useState();
   const[deleteTask, setDeleteTask]= useState();
+  const [newTaskData, setNewtaskData]= useState(init);
 
     useEffect( () => {
             
             if(deleteTask){
               var url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`;
-            }else if(['completed', 'incompleted'].includes(resourceType)){
+            }else if(['completed', 'incompleted'].includes(resourceType) && !newTask){
               url = `http://10.0.0.99:8000/api/tasks/${resourceType}`;
             }else if(updateData && taskToUpdate){
               url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
@@ -81,12 +89,14 @@ function App(props) {
               })
             }else if(requestMethode==="POST"){
               //Create a new Task;
-              axios.post(url, dataToSend)
+              axios.post(url, newTaskData)
               .then(res=>{
                   setData(res.data);
                   console.log(res.statusText)
                   //set the succeful message
                   setSuccessMessage(res.statusText)
+                  //reset the Request type after success
+                  setRequestMethode();
               })
   
               .catch(error =>{
@@ -97,7 +107,7 @@ function App(props) {
             }
         
     }
-    ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask]);
+    ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask], newTaskData);
 
     const taskHandlerAll = ()=>{
       setRequestMethode("GET")
@@ -146,17 +156,12 @@ function App(props) {
     }
     
     const handlerOnChangeForNewTask = (e)=>{
-      let dataValue = {
-        'author':'sadric',
-        'description':'',
-        'title':'',
-        'completed':false
-      }
-      const name = e.target.name;
-      const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
-      dataValue[name]=value;
-      setDataToSend(dataValue);
-      console.log(dataToSend);
+      let name = e.target.name;
+      let value = e.target.type==='checkbox'? e.target.checked:e.target.value;
+      setNewtaskData({
+        ...newTaskData,
+        [name]:value
+      })
     
     }
 
@@ -165,20 +170,16 @@ function App(props) {
       const name = e.target.name;
       const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
       dataValue[name]=value;
-      // setDataToSend({[name]:value});
       console.log(dataValue)
-      // delete dataValue.id;
-      // console.log(dataToSend);
-      // console.log({[name]:value});
       
     }
 
     const handlerOnSubmit = (e)=>{
-      console.log(dataToSend)
       //change the request type PUT or POST
-      // if(newTask){
-      //   setRequestMethode("POST")
-      // }
+      if(newTask){
+        setRequestMethode("POST")
+      }
+      console.log(newTaskData)
       // else{
       // setRequestMethode('PUT');
       // }
