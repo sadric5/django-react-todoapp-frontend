@@ -19,7 +19,7 @@ function App(props) {
   const [data, setData]=useState([]);
   const [resourceType, setResourceType] = useState();
   const [dataToSend, setDataToSend] = useState({});
-  const [requestMethode, setRequestMethode]= useState()
+  const [requestMethode, setRequestMethode]= useState('GET')
   const [successMessage, setSuccessMessage] = useState()
   const [newTask, setNewtask]=useState();
   const[deleteTask, setDeleteTask]= useState();
@@ -27,13 +27,10 @@ function App(props) {
 
     useEffect( () => {
             
-            if(deleteTask){
+            if(deleteTask || (updateData && taskToUpdate)){
               var url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`;
-            }else if(['completed', 'incompleted'].includes(resourceType) && !newTask){
+            }else if(['completed', 'incompleted', ''].includes(resourceType) && !newTask){
               url = `http://10.0.0.99:8000/api/tasks/${resourceType}`;
-            }else if(updateData && taskToUpdate){
-              url = `http://10.0.0.99:8000/api/task/${taskToUpdate}`
-              // setRequestMethode(''); 
             }else if(newTask){
               //Make a POST request to this endpoint;
               url = `http://10.0.0.99:8000/api/task/`
@@ -63,10 +60,12 @@ function App(props) {
               // setNewtask();
               axios.delete(url, dataToSend)
               .then(res=>{
-                  setData(res.data);
+                  // setData(res.data);
                   console.log(res.statusText)
                   //set the succeful message
                   setSuccessMessage(res.statusText)
+                  //Display all Task after delete.
+                  setRequestMethode('GET');
               })
   
               .catch(error =>{
@@ -75,8 +74,8 @@ function App(props) {
               })
             }else if (requestMethode==='GET'){
               //Avoid display the UpdateCreatForm by set newTask to Undifined
-              setNewtask();
-              setSuccessMessage('')
+              // setNewtask();
+              // setSuccessMessage('')
               //get request
               axios.get(url)
               .then(res=>{
@@ -96,7 +95,7 @@ function App(props) {
                   //set the succeful message
                   setSuccessMessage(res.statusText)
                   //reset the Request type after success
-                  setRequestMethode();
+                  setRequestMethode('GET');
               })
   
               .catch(error =>{
@@ -107,16 +106,19 @@ function App(props) {
             }
         
     }
-    ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask], newTaskData);
+    ,[resourceType, updateData, taskToUpdate,requestMethode, deleteTask, newTaskData]);
 
     const taskHandlerAll = ()=>{
-      setRequestMethode("GET")
+      setSuccessMessage();
+      setRequestMethode("GET");
       setResourceType('');
       setDeleteTask(false);
       setUpdateData(false);
+      setNewtask(false);
     }
 
     const taskHandlerCompleted = ()=>{
+      setSuccessMessage();
       setRequestMethode('GET');
       setResourceType('completed');
       setDeleteTask(false);
@@ -124,8 +126,8 @@ function App(props) {
       setNewtask(false);
       
     }
-
     const taskHandlerIncompleted = ()=>{
+      setSuccessMessage();
       setRequestMethode('GET');
       setResourceType('incompleted');
       setDeleteTask(false);
@@ -135,8 +137,9 @@ function App(props) {
     }
 
     const taskHandlerNew = ()=>{
-      setData({});
+      // setData({});
       // setRequestMethode('POST');
+      setSuccessMessage();
       setDeleteTask(false);
       setNewtask(true);
     }
@@ -162,15 +165,17 @@ function App(props) {
         ...newTaskData,
         [name]:value
       })
+      console.log(newTaskData)
     
     }
 
     const handlerOnChange = (e)=>{
-      let dataValue = {}
+      // let dataV = {}
       const name = e.target.name;
       const value = e.target.type==='checkbox'? e.target.checked:e.target.value;
-      dataValue[name]=value;
-      console.log(dataValue)
+      // dataV[name]= value;
+      setDataToSend({...data, [name]:value});
+      console.log(dataToSend)
       
     }
 
@@ -178,11 +183,11 @@ function App(props) {
       //change the request type PUT or POST
       if(newTask){
         setRequestMethode("POST")
+        console.log(newTaskData)
+      }else if(updateData){
+        setRequestMethode('PUT');
+        console.log(dataToSend)
       }
-      console.log(newTaskData)
-      // else{
-      // setRequestMethode('PUT');
-      // }
       e.preventDefault();
 
     }
@@ -207,7 +212,7 @@ function App(props) {
         onClick={handler}
         method = {requestMethode}//don't need just for debuging
         
-        onChange={newTask?handlerOnChangeForNewTask:handlerOnChange}
+        onChange={newTask || data.length===0?handlerOnChangeForNewTask:handlerOnChange}
       
         onSubmit={handlerOnSubmit} 
         successMessage={successMessage}
@@ -297,11 +302,18 @@ function Output(props){
 
 // ============================= Update Button===================
 function UpdateButhton(props){
+
+  const deleteTask= ()=>{
+    let confirmationOfDeleteTask = window.confirm('Are you sure you want to this task?')
+    if(confirmationOfDeleteTask){
+      return props.onDelete()
+    }
+  }
   return (
     <div>
       <button className='btn bg-success m-5 text-center' onClick={()=>props.onClick()}> Update</button>
 
-    <button className='btn bg-danger m-5 text-center' onClick={()=>props.onDelete()} > Delete</button>
+    <button className='btn bg-danger m-5 text-center' onClick={()=>deleteTask()}> Delete</button>
     </div>
   )
 }
