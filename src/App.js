@@ -80,6 +80,8 @@ function App(props) {
               axios.get(url)
               .then(res=>{
                 setData(res.data);
+                setNewtask(false)
+
               })
 
               .catch(error =>{
@@ -93,7 +95,7 @@ function App(props) {
                   setData(res.data);
                   console.log(res.statusText)
                   //set the succeful message
-                  setSuccessMessage(res.statusText)
+                  setSuccessMessage('')
                   //reset the Request type after success
                   setRequestMethode('GET');
               })
@@ -138,10 +140,12 @@ function App(props) {
 
     const taskHandlerNew = ()=>{
       // setData({});
-      // setRequestMethode('POST');
+      setRequestMethode('');
       setSuccessMessage();
       setDeleteTask(false);
       setNewtask(true);
+      setUpdateData(false)
+      
     }
 
     //Delete task
@@ -184,6 +188,8 @@ function App(props) {
       if(newTask){
         setRequestMethode("POST")
         console.log(newTaskData)
+        
+
       }else if(updateData){
         setRequestMethode('PUT');
         console.log(dataToSend)
@@ -238,7 +244,7 @@ function Displayer(props){
     return <h2 className='text-center text-success'>You are successfully update the task!</h2>
   }else if(props.update){
     return <UpdateCreateForm data={props.data} onChange={props.onChange} onSubmit={props.onSubmit}/>;
-  }else if(props.data.length>1){
+  }else if(props.data.length>0){
     return <Output data={props.data} onClick={props.onClick} onDelete ={props.onDelete}/>
   }
   else{
