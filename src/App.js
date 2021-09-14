@@ -216,7 +216,7 @@ function App(props) {
         update={updateData}
         deleteTask={deleteTask}
         onClick={handler}
-        method = {requestMethode}//don't need just for debuging
+        method = {requestMethode}//don't need it. Just for debuging
         
         onChange={newTask || data.length===0?handlerOnChangeForNewTask:handlerOnChange}
       
